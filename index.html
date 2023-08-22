@@ -55,8 +55,15 @@
             rules: [
                 Validator.isRequired('#fullname'),
                 Validator.isEmail('#email'),
-                Validator.minLength('#password', 8),
-            ]
+                Validator.minLength('#password', 3),
+                Validator.isRequired('#password_confirmation'),
+                Validator.isConfirmed('#password_confirmation', function (){
+                  return document.querySelector('#form-1 #password').value
+                }, 'Mat khau nhap lai khong chinh xac')
+            ],
+            onSubmit: function(data) {
+              console.log(data);
+            }
         });
 
       </script>
