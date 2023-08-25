@@ -23,7 +23,18 @@ function Validator(options){
         // Lap qua tung rule va kiem tra
         // Neu co loi thi dung viec kiem tra
         for (var i = 0; i < rules.length; i++){
-            errorMessage = rules[i](inputElement.value)
+            switch (inputElement.type){
+
+                case 'radio':
+                case '':
+                    errorMessage = rules[i](
+                        formElement.querySelector(rule.selector + ':checked')
+                    )
+                    break;
+
+                default: 
+                    errorMessage = rules[i](inputElement.value)
+            }
             if(errorMessage) break
         }
 
@@ -53,6 +64,7 @@ function Validator(options){
             // Lap qua tung rule va validate
             options.rules.forEach(function(rule){
                 var inputElement = formElement.querySelector(rule.selector)
+
                 var isValid = validate(inputElement, rule)
 
                 if(!isValid){
@@ -67,7 +79,29 @@ function Validator(options){
 
                     var enableInputs = formElement.querySelectorAll('[name]')
                     var formValues = Array.from(enableInputs).reduce(function(values, input){
-                        values[input.name] = input.value
+                        switch(input.type){
+                            case 'radio':
+                                values[input.name] = formElement.querySelector(`input[name="${input.name}"]:checked`).value
+                                break
+                                
+                            case 'checkbox':
+                                if(!input.matches(':checked')){
+                                    values[input.name] = ''
+                                    return values;
+                                };
+
+                                if(!Array.isArray(values[input.name])){
+                                    values[input.name] = []
+                                }
+                                values[input.name].push(input.value)
+                                break;
+
+                            case 'file':
+                                values[input.name] = input.files
+                                break;
+                            default:
+                                values[input.name] = input.value
+                        }
                         return values
                     }, {})
 
@@ -90,8 +124,9 @@ function Validator(options){
             }
             
 
-            var inputElement = formElement.querySelector(rule.selector)
-            if(inputElement){
+            var inputElements = formElement.querySelectorAll(rule.selector)
+
+            Array.from(inputElements).forEach(function(inputElement){
                 //Xu ly truong hop blur khoi input
                 inputElement.onblur = function (){
                     validate(inputElement, rule)
@@ -103,7 +138,7 @@ function Validator(options){
                     errorElement.innerText = ''
                     getParent(inputElement, options.formGroupSelector).classList.remove('invalid')
                 }
-            }
+            })
         });
 
     }
@@ -117,7 +152,7 @@ Validator.isRequired = function(selector, message){
     return {
         selector: selector,
         test: function (value){
-            return value.trim() ? undefined : message || 'Vui long nhap truong nay'
+            return value ? undefined : message || 'Vui long nhap truong nay'
         }
     }
 }
