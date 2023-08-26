@@ -1,9 +1,6 @@
-function Validator(formSelector, options){
-
-    // Gan gia tri mac dinh cho tham so (ES5))
-    if(!options){
-        options = {}
-    }
+function Validator(formSelector){
+    _this = this;
+    var formRules = {}
 
     function getParent(element, selector){
 
@@ -15,8 +12,6 @@ function Validator(formSelector, options){
         }
         
     }
-
-    var formRules = {}
 
     /**
      *  Quy uoc tao rule: 
@@ -88,10 +83,15 @@ function Validator(formSelector, options){
                 var rules = formRules[e.target.name]
                 var errorMessage;
 
-                rules.find(function(rule){
+                for(var rule of rules){
                     errorMessage = rule(e.target.value)
-                    return errorMessage
-                })
+                    if(errorMessage) break;
+                }
+
+                // rules.find(function(rule){
+                //     errorMessage = rule(e.target.value)
+                //     return errorMessage
+                // })
 
                 // Neu co loi thi hien thi ra UI
                 if(errorMessage){
@@ -139,7 +139,7 @@ function Validator(formSelector, options){
         // Khi khong co loi thi submit form
         if(isValid){
 
-            if(typeof options.onSubmit === 'function'){
+            if(typeof _this.onSubmit === 'function'){
 
                 var enableInputs = formElement.querySelectorAll('[name]')
                 var formValues = Array.from(enableInputs).reduce(function(values, input){
@@ -172,7 +172,7 @@ function Validator(formSelector, options){
                 }, {})
 
                 // Goi lai ham onSubmit va tra ve gia tri cua form
-                options.onSubmit(formValues)
+                _this.onSubmit(formValues)
 
             } else {
                 formElement.submit()
